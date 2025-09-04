@@ -631,12 +631,8 @@
     window.addEventListener('resize', fixHeight);
     fixHeight();
 
-    // Використовуємо задню камеру
-    AFRAME.utils.device.getCameraPermission = function () {
-      return navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' }
-      });
-    };
+    // Використовуємо задню камеру (без змін основної логіки AR.js)
+    // Це видалено, щоб не конфліктувати з AR.js
 
     // Функції квізу
     function showQuiz() {
@@ -644,6 +640,8 @@
       currentQuestion = 0;
       answers = new Array(12).fill(null);
       quizResult.style.display = 'none';
+      document.getElementById('quizQuestions').style.display = 'block';
+      document.getElementById('quizNavigation').style.display = 'flex';
       renderQuestion();
       updateNavigation();
     }
@@ -747,17 +745,12 @@
     submitBtn.addEventListener('click', calculateResult);
     closeQuizBtn.addEventListener('click', () => {
       quizModal.style.display = 'none';
-      document.getElementById('quizQuestions').style.display = 'block';
-      document.getElementById('quizNavigation').style.display = 'flex';
     });
 
     // Закриття модального вікна при кліку поза ним
     quizModal.addEventListener('click', (e) => {
       if (e.target === quizModal) {
         quizModal.style.display = 'none';
-        document.getElementById('quizQuestions').style.display = 'block';
-        document.getElementById('quizNavigation').style.display = 'flex';
-        quizResult.style.display = 'none';
       }
     });
   </script>
