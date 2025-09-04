@@ -108,6 +108,24 @@
       box-shadow: 0 6px 12px rgba(0,0,0,0.4);
     }
 
+    /* Кнопка квізу */
+    #quizBtn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(45deg, #4CAF50, #45a049);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 25px;
+      font-size: 1em;
+      font-weight: bold;
+      text-decoration: none;
+      z-index: 15;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      border: none;
+      cursor: pointer;
+    }
+
     /* Кнопки керування відео */
     #videoControls {
       position: fixed;
@@ -152,6 +170,161 @@
       background: #00cc66 !important;
       color: white !important;
     }
+
+    /* Модальне вікно квізу */
+    #quizModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    #quizContainer {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 30px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 0 30px rgba(255, 105, 180, 0.8);
+      position: relative;
+    }
+
+    #quizContainer h2 {
+      color: #d1006c;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .quiz-question {
+      margin-bottom: 20px;
+    }
+
+    .quiz-question h3 {
+      color: #4CAF50;
+      margin-bottom: 10px;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .quiz-option {
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.8);
+      border: 2px solid #4CAF50;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .quiz-option:hover {
+      background: rgba(76, 175, 80, 0.2);
+    }
+
+    .quiz-option.selected {
+      background: rgba(76, 175, 80, 0.4);
+      border-color: #45a049;
+      font-weight: bold;
+    }
+
+    #quizNavigation {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    .quiz-nav-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    #prevBtn {
+      background: #ff9800;
+      color: white;
+    }
+
+    #nextBtn {
+      background: #4CAF50;
+      color: white;
+    }
+
+    #submitBtn {
+      background: #2196F3;
+      color: white;
+      display: none;
+    }
+
+    /* Результат квізу */
+    #quizResult {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+
+    #badgeContainer {
+      background: linear-gradient(45deg, #FFD700, #FFA500);
+      border-radius: 20px;
+      padding: 30px;
+      margin: 20px 0;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+    }
+
+    #badgeTitle {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #8B4513;
+      margin-bottom: 15px;
+    }
+
+    #starsContainer {
+      font-size: 2em;
+      color: #FFD700;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+      margin: 20px 0;
+    }
+
+    #resultText {
+      font-size: 1.2em;
+      color: #8B4513;
+      margin: 20px 0;
+    }
+
+    #closeQuizBtn {
+      background: #f44336;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+
+    /* Адаптивність */
+    @media (max-width: 600px) {
+      #quizContainer {
+        padding: 20px;
+        width: 95%;
+      }
+      
+      .quiz-option {
+        padding: 10px;
+        font-size: 0.9em;
+      }
+    }
   </style>
 </head>
 <body>
@@ -167,6 +340,9 @@
 
   <!-- Жовта крапка -->
   <div id="centerYellowDot"></div>
+
+  <!-- Кнопка квізу -->
+  <button id="quizBtn">🎓 Квіз: Який ти вчитель?</button>
 
   <!-- AR Сцена -->
   <a-scene embedded arjs="sourceType: webcam; detectionMode: mono; trackingMethod: best;">
@@ -197,11 +373,38 @@
     <button id="stopBtn" class="video-btn">⏹</button>
   </div>
 
+  <!-- Модальне вікно квізу -->
+  <div id="quizModal">
+    <div id="quizContainer">
+      <h2>🎓 Який ти вчитель?</h2>
+      
+      <!-- Питання будуть динамічно додаватися тут -->
+      <div id="quizQuestions"></div>
+      
+      <!-- Навігація -->
+      <div id="quizNavigation">
+        <button id="prevBtn" class="quiz-nav-btn">⬅️ Назад</button>
+        <button id="nextBtn" class="quiz-nav-btn">Далі ➡️</button>
+        <button id="submitBtn" class="quiz-nav-btn">Готово ✅</button>
+      </div>
+      
+      <!-- Результат -->
+      <div id="quizResult">
+        <div id="badgeContainer">
+          <div id="badgeTitle">🏆 Твій бейдж вчителя</div>
+          <div id="starsContainer"></div>
+          <div id="resultText"></div>
+        </div>
+        <button id="closeQuizBtn">Закрити</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const marker = document.getElementById('marker');
     const scanText = document.getElementById('scanText');
     const centerYellowDot = document.getElementById('centerYellowDot');
-    const arVideo = document.getElementById('arVideoSrc'); // Відео як текстура
+    const arVideo = document.getElementById('arVideoSrc');
     const arVideoEntity = document.getElementById('arVideoEntity');
     const clickToStart = document.getElementById('clickToStart');
     const videoControls = document.getElementById('videoControls');
@@ -209,8 +412,158 @@
     const playBtn = document.getElementById('playBtn');
     const pauseBtn = document.getElementById('pauseBtn');
     const stopBtn = document.getElementById('stopBtn');
+    const quizBtn = document.getElementById('quizBtn');
+
+    // Квіз елементи
+    const quizModal = document.getElementById('quizModal');
+    const quizQuestions = document.getElementById('quizQuestions');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    const quizResult = document.getElementById('quizResult');
+    const starsContainer = document.getElementById('starsContainer');
+    const resultText = document.getElementById('resultText');
+    const closeQuizBtn = document.getElementById('closeQuizBtn');
 
     let canPlay = false;
+    let currentQuestion = 0;
+    let answers = new Array(12).fill(null);
+
+    // Питання для квізу
+    const quizQuestionsData = [
+      {
+        question: "Як ти реагуєш на помилки учнів?",
+        options: [
+          "Вказую на них з розчаруванням",
+          "Пояснюю, як виправити",
+          "Сміюся разом з класом",
+          "Питаю, чому так сталося"
+        ]
+      },
+      {
+        question: "Який твій улюблений спосіб навчання?",
+        options: [
+          "Лекції та пояснення",
+          "Практичні завдання",
+          "Групові обговорення",
+          "Експерименти та досліди"
+        ]
+      },
+      {
+        question: "Як ти мотивуєш учнів?",
+        options: [
+          "Строгі оцінки",
+          "Похвала та заохочення",
+          "Конкуренція між учнями",
+          "Цікаві приклади з життя"
+        ]
+      },
+      {
+        question: "Як ти вирішуєш конфлікти в класі?",
+        options: [
+          "Наказую замовкнути",
+          "Розмовляю окремо з учасниками",
+          "Даю всім час висловитися",
+          "Викликаю батьків"
+        ]
+      },
+      {
+        question: "Який твій стиль викладання?",
+        options: [
+          "Строгий та дисциплінований",
+          "Дружній та доступний",
+          "Креативний та нестандартний",
+          "Структурований та системний"
+        ]
+      },
+      {
+        question: "Як ти ставишся до технологій у навчанні?",
+        options: [
+          "Краще без них",
+          "Використовую обережно",
+          "Активно інтегрую",
+          "Залежить від предмету"
+        ]
+      },
+      {
+        question: "Як ти організовуєш роботу в класі?",
+        options: [
+          "Чіткий розклад та правила",
+          "Гнучкий підхід",
+          "Творчі підходи",
+          "Індивідуальний підхід до кожного"
+        ]
+      },
+      {
+        question: "Як ти оцінюєш знання учнів?",
+        options: [
+          "Тільки контрольні та тести",
+          "Комплексна оцінка",
+          "Портфоліо та проекти",
+          "Спостереження та бесіди"
+        ]
+      },
+      {
+        question: "Як ти взаємодієш з батьками?",
+        options: [
+          "Тільки при проблемах",
+          "Регулярні зв'язки",
+          "Через класного керівника",
+          "За потреби"
+        ]
+      },
+      {
+        question: "Який твій підхід до талановитих учнів?",
+        options: [
+          "Звичайне ставлення",
+          "Додаткові завдання",
+          "Особлива увага",
+          "Рекомендації для розвитку"
+        ]
+      },
+      {
+        question: "Як ти ставишся до професійного розвитку?",
+        options: [
+          "Достатньо того, що є",
+          "Постійно вчуся новому",
+          "Відвідую курси та семінари",
+          "Експериментую з методиками"
+        ]
+      },
+      {
+        question: "Який твій головний пріоритет як вчителя?",
+        options: [
+          "Передати знання",
+          "Розвинути особистість",
+          "Зберегти інтерес до навчання",
+          "Підготувати до життя"
+        ]
+      }
+    ];
+
+    // Типи вчителів з описами
+    const teacherTypes = [
+      {
+        title: "Мудрий Наставник",
+        description: "Ти справжній мудрець, який веде учнів шляхом знань. Твої уроки - це подорож у світ відкриттів!",
+        minScore: 40
+      },
+      {
+        title: "Натхненний Вихователь",
+        description: "Ти вмієш надихати та виховувати справжніх громадян. Твоє серце - ключ до сердець учнів!",
+        minScore: 30
+      },
+      {
+        title: "Креативний Педагог",
+        description: "Ти робиш навчання яскравим та цікавим. Твої ідеї вдихають життя в будь-який предмет!",
+        minScore: 20
+      },
+      {
+        title: "Професійний Вчитель",
+        description: "Ти відповідально ставишся до своєї справи. Твої знання та досвід - основа успіху учнів!",
+        minScore: 0
+      }
+    ];
 
     // Приховуємо кнопки керування спочатку
     videoControls.style.display = 'none';
@@ -222,14 +575,15 @@
     });
 
     // Після завантаження метаданих — встановлюємо пропорції
-arVideo.addEventListener('loadedmetadata', () => {
-  const aspect = arVideo.videoWidth / arVideo.videoHeight;
-  const targetHeight = 2;
-  const widenedWidth = targetHeight * aspect * 2.5;
+    arVideo.addEventListener('loadedmetadata', () => {
+      const aspect = arVideo.videoWidth / arVideo.videoHeight;
+      const targetHeight = 2;
+      const widenedWidth = targetHeight * aspect * 2.5;
 
-  arVideoEntity.setAttribute('geometry', 'width', widenedWidth);
-  arVideoEntity.setAttribute('geometry', 'height', targetHeight);
-});
+      arVideoEntity.setAttribute('geometry', 'width', widenedWidth);
+      arVideoEntity.setAttribute('geometry', 'height', targetHeight);
+    });
+
     // Маркер знайдено
     marker.addEventListener('markerFound', () => {
       scanText.style.display = 'none';
@@ -265,6 +619,11 @@ arVideo.addEventListener('loadedmetadata', () => {
       arVideo.currentTime = 0;
     });
 
+    // Кнопка квізу
+    quizBtn.addEventListener('click', () => {
+      showQuiz();
+    });
+
     // Фікс висоти
     function fixHeight() {
       document.body.style.height = window.innerHeight + 'px';
@@ -278,12 +637,129 @@ arVideo.addEventListener('loadedmetadata', () => {
         video: { facingMode: 'environment' }
       });
     };
+
+    // Функції квізу
+    function showQuiz() {
+      quizModal.style.display = 'flex';
+      currentQuestion = 0;
+      answers = new Array(12).fill(null);
+      quizResult.style.display = 'none';
+      renderQuestion();
+      updateNavigation();
+    }
+
+    function renderQuestion() {
+      const questionData = quizQuestionsData[currentQuestion];
+      let optionsHTML = '';
+      
+      questionData.options.forEach((option, index) => {
+        const isSelected = answers[currentQuestion] === index;
+        optionsHTML += `
+          <div class="quiz-option ${isSelected ? 'selected' : ''}" 
+               data-index="${index}">
+            ${option}
+          </div>
+        `;
+      });
+
+      quizQuestions.innerHTML = `
+        <div class="quiz-question">
+          <h3>Питання ${currentQuestion + 1} з ${quizQuestionsData.length}</h3>
+          <p>${questionData.question}</p>
+          <div class="quiz-options">
+            ${optionsHTML}
+          </div>
+        </div>
+      `;
+
+      // Додаємо обробники подій для варіантів відповідей
+      document.querySelectorAll('.quiz-option').forEach(option => {
+        option.addEventListener('click', function() {
+          const selectedIndex = parseInt(this.getAttribute('data-index'));
+          answers[currentQuestion] = selectedIndex;
+          renderQuestion(); // Перемалювуємо для виділення вибраного
+        });
+      });
+    }
+
+    function updateNavigation() {
+      prevBtn.style.display = currentQuestion > 0 ? 'block' : 'none';
+      nextBtn.style.display = currentQuestion < quizQuestionsData.length - 1 ? 'block' : 'none';
+      submitBtn.style.display = currentQuestion === quizQuestionsData.length - 1 ? 'block' : 'none';
+    }
+
+    function nextQuestion() {
+      if (currentQuestion < quizQuestionsData.length - 1) {
+        currentQuestion++;
+        renderQuestion();
+        updateNavigation();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentQuestion > 0) {
+        currentQuestion--;
+        renderQuestion();
+        updateNavigation();
+      }
+    }
+
+    function calculateResult() {
+      // Підрахунок балів (проста сума вибраних варіантів)
+      const totalScore = answers.reduce((sum, answer) => sum + (answer || 0), 0);
+      
+      // Визначення типу вчителя
+      let teacherType = teacherTypes[teacherTypes.length - 1]; // За замовчуванням
+      for (let type of teacherTypes) {
+        if (totalScore >= type.minScore) {
+          teacherType = type;
+          break;
+        }
+      }
+
+      // Визначення кількості зірок (від 1 до 5)
+      const maxScore = quizQuestionsData.length * 3; // Максимальний бал (3 бали за питання)
+      const starCount = Math.max(1, Math.floor((totalScore / maxScore) * 5));
+      
+      // Генерація зірок
+      let starsHTML = '';
+      for (let i = 0; i < 5; i++) {
+        starsHTML += i < starCount ? '⭐' : '☆';
+      }
+
+      // Відображення результату
+      starsContainer.innerHTML = starsHTML;
+      resultText.innerHTML = `
+        <h3>${teacherType.title}</h3>
+        <p>${teacherType.description}</p>
+        <p><strong>Твій результат: ${totalScore} балів</strong></p>
+      `;
+
+      // Показ результату
+      document.getElementById('quizQuestions').style.display = 'none';
+      document.getElementById('quizNavigation').style.display = 'none';
+      quizResult.style.display = 'block';
+    }
+
+    // Обробники подій для навігації
+    nextBtn.addEventListener('click', nextQuestion);
+    prevBtn.addEventListener('click', prevQuestion);
+    submitBtn.addEventListener('click', calculateResult);
+    closeQuizBtn.addEventListener('click', () => {
+      quizModal.style.display = 'none';
+      document.getElementById('quizQuestions').style.display = 'block';
+      document.getElementById('quizNavigation').style.display = 'flex';
+    });
+
+    // Закриття модального вікна при кліку поза ним
+    quizModal.addEventListener('click', (e) => {
+      if (e.target === quizModal) {
+        quizModal.style.display = 'none';
+        document.getElementById('quizQuestions').style.display = 'block';
+        document.getElementById('quizNavigation').style.display = 'flex';
+        quizResult.style.display = 'none';
+      }
+    });
   </script>
 </body>
 </html>
-
-
-
-
-
-
